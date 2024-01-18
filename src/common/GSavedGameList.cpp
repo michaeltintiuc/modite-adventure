@@ -3,6 +3,7 @@
 #include <Panic.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <ctype.h>
 
 GSavedGameList gSavedGameList;
 

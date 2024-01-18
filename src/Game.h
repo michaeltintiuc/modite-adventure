@@ -9,10 +9,6 @@
 
 #define ENABLE_AUDIO
 
-// Debug mode
-#define DEBUG_MODE
-#undef DEBUG_MODE
-
 // special characters
 #define STR_LEFT_ARROW "\xf"
 #define STR_RIGHT_ARROW "\xe"
