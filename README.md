@@ -7,6 +7,36 @@ Modite Adventure is a cross-platform a action/adventure created by [Modus Create
 
 For build instructions, take a look at our [development documentation](https://github.com/ModusCreateOrg/modite-adventure/wiki).
 
+## Browser build for itch.io
+
+Install [Emscripten](https://emscripten.org/docs/getting_started/downloads.html), CMake, Ninja, and Python 3. This build was tested with Emscripten 7.0.1. If the `creative-engine` directory is missing,
+clone Creative Engine from the repository root.
+
+```powershell
+git clone --branch develop https://github.com/ModusCreateOrg/creative-engine.git creative-engine
+```
+
+In a shell with the Emscripten SDK environment active, run these commands from the repository root. Emscripten fetches and builds its SDL2 port on the first
+build. The web build uses the precompiled assets in `src/Resources.zip`.
+
+```powershell
+emcmake cmake -S . -B build/web -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build/web
+python -m http.server 8000 --directory build/web/html
+```
+
+Open `http://localhost:8000` to play. Click the game so it receives keyboard input and the browser can start audio. If you installed the SDK into `build/emsdk`
+on Windows, run `. ./build/emsdk/emsdk_env.ps1` to activate it in a new PowerShell session. Use the arrow keys to move and X to select or attack. Use **Pause ? Save Progress** to save progress. The browser stores saves and options in IndexedDB for the current site and browser profile.
+
+Package the contents of `build/web/html` so `index.html` is at the ZIP root.
+
+```powershell
+Compress-Archive -Path build/web/html/index.* -DestinationPath build/modite-adventure-itch.zip -Force
+```
+
+Upload the ZIP as a browser-playable HTML game. Set the embedded viewport to at least 640×480 to fit the game's default
+canvas. [itch.io HTML5 upload guide](https://itch.io/docs/creators/html5)
+
 ![header_image.jpg](./md/images/header_image.jpg)
 
 Check out our Videos.

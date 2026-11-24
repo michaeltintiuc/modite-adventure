@@ -1,6 +1,11 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 PROJECT(Modite)
 
+if(EMSCRIPTEN)
+  include(cmake/ModiteWeb.cmake)
+  return()
+endif()
+
 ADD_COMPILE_DEFINITIONS(CE_SDL2_WINDOW_TITLE="Modite Adventure :: by Modus Create")
 
 SET(CMAKE_CXX_STANDARD 14)

@@ -2,7 +2,7 @@
 #define MODITE_GRESOURCES_H
 
 #include <BTypes.h>
-#include "Resources.h"
+#include <Resources.h>
 
 // Events
 const TUint16 EVENT_SPELL_PROCESS_EXIT = 1;

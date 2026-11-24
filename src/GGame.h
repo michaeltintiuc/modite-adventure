@@ -48,7 +48,10 @@ public:
   BGameEngine *CurrentState();
 
   static TBool mDebug;
-protected:
+
+private:
+  TBool RunFrame();
+
 protected:
   TInt mState;
   TInt mNextState;
