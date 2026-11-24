@@ -42,6 +42,10 @@ string(REPLACE "${include_marker}" [=[#include "DesktopControls.h"
 #include "WebGamepad.h"]=] controls_source "${controls_source}")
 string(REPLACE "  SDL_Event e;" "  const TUint16 gamepadKeys = ReadWebGamepad();
   SDL_Event e;" controls_source "${controls_source}")
+string(REPLACE "  while (SDL_PollEvent(&e)) {" [=[  while (SDL_PollEvent(&e)) {
+    if ((e.type == SDL_KEYDOWN || e.type == SDL_KEYUP) && e.key.keysym.scancode == SDL_SCANCODE_Q) {
+      continue;
+    }]=] controls_source "${controls_source}")
 string(REPLACE "${update_marker}" [=[    bKeys = keys;
     const TUint16 combined = keys | gamepadKeys;
     dKeys |= combined & ~cKeys;

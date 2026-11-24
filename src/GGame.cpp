@@ -201,6 +201,11 @@ void GGame::Run() {
   emscripten_set_main_loop_arg([](void *context) {
     auto *game = static_cast<GGame *>(context);
     if (!game->RunFrame()) {
+      // Update presents the render bitmap after swapping the buffers.
+      gDisplay.SetColor(0, 0, 0, 0);
+      gDisplay.renderBitmap->Clear();
+      gDisplay.Update();
+      soundEngine.Reset();
       emscripten_cancel_main_loop();
       delete game;
       gGame = nullptr;
