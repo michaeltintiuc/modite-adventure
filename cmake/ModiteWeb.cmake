@@ -87,3 +87,11 @@ target_include_directories(Modite PRIVATE
         "${engine}/Controls/LDKControls" "${engine}/Widgets" "${engine}/libxmp"
         "${engine}/libxmp/loaders"
 )
+
+add_custom_target(run-web
+        COMMAND Python3::Interpreter "${PROJECT_SOURCE_DIR}/scripts/preview-web.py"
+                "$<TARGET_FILE_DIR:Modite>"
+        DEPENDS Modite
+        USES_TERMINAL
+        VERBATIM
+)

@@ -26,6 +26,19 @@ Thumbs.db*
 *.sublime-workspace
 *.komodoproject
 .idea
+# Share Rider run configuration XML while ignoring local workspace settings.
+!/.idea/
+/.idea/*
+!/.idea/runConfigurations/
+/.idea/runConfigurations/*
+!/.idea/runConfigurations/*.xml
+!/.idea/.idea.modite-adventure.cmake/
+/.idea/.idea.modite-adventure.cmake/*
+!/.idea/.idea.modite-adventure.cmake/.idea/
+/.idea/.idea.modite-adventure.cmake/.idea/*
+!/.idea/.idea.modite-adventure.cmake/.idea/runConfigurations/
+/.idea/.idea.modite-adventure.cmake/.idea/runConfigurations/*
+!/.idea/.idea.modite-adventure.cmake/.idea/runConfigurations/*.xml
 .vscode/&
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -80,6 +93,7 @@ wp-content/plugins/hello.php
 
 # track these files, if they exist
 !.gitignore
+/.idea/**/.gitignore
 !.editorconfig
 !.ccls
 
