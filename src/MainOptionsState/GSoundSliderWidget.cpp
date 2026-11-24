@@ -41,7 +41,11 @@ TInt GSoundSliderWidget::RenderTitle(TInt aX, TInt aY, TBool aActive) {
 }
 
 TInt GSoundSliderWidget::Render(TInt aX, TInt aY) {
+#ifdef __EMSCRIPTEN__
+  aX += 66;
+#else
   aX += 60;
+#endif
   aY -= 20;
 
   const BFont  *f = gWidgetTheme.GetFont(WIDGET_TITLE_FONT);

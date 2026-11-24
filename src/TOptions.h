@@ -16,12 +16,15 @@ struct GameProgress {
 };
 
 struct TOptions {
+  static constexpr TInt RUMBLE_MAX = 8;
+
   TInt   version;
   TBool  muted;
   TFloat music;
   TFloat sfx;
   TFloat brightness;
   GameProgress gameProgress;
+  TInt rumble;
 
   TOptions();
 

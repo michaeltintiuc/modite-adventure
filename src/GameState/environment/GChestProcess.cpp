@@ -1,4 +1,5 @@
 #include "GChestProcess.h"
+#include "GGame.h"
 #include "GPlayer.h"
 #include "inventory/GItemProcess.h"
 
@@ -47,6 +48,7 @@ TBool GChestProcess::RunAfter() {
 //    mSprite->type = STYPE_DEFAULT;
 //    mSprite->cType = 0;
 //    mSprite->ClearFlags(SFLAG_CHECK);
+    GGame::RumbleImpact();
     gSoundPlayer.TriggerSfx(SFX_CHEST_OPEN_WAV);
     mSprite->ClearCMask(STYPE_PBULLET);
     mSprite->ClearCType(STYPE_PBULLET);

@@ -1,117 +1,104 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
-PROJECT(Modite)
+cmake_minimum_required(VERSION 3.12)
+project(Modite)
 
-ADD_COMPILE_DEFINITIONS(CE_SDL2_WINDOW_TITLE="Modite Adventure :: by Modus Create")
+option(DEBUG_MODE "Enable Debug Mode" OFF)
 
-SET(CMAKE_CXX_STANDARD 14)
-SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wno-implicit-exception-spec-mismatch")
-SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-implicit-exception-spec-mismatch")
-include(ProcessorCount)
-
-SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/creative-engine/cmake.files)
-SET(RESOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/resources)
-
-#ADD_COMPILE_DEFINITIONS(__DINGUX__=true)
-ADD_COMPILE_DEFINITIONS(__MODUS_TARGET_SDL2_AUDIO__=true)
-ADD_COMPILE_DEFINITIONS(__MODUS_TARGET_DESKTOP_CONTROLS__=true)
-ADD_COMPILE_DEFINITIONS(__MODUS_TARGET_DESKTOP_DISPLAY__=true)
-
-# Handhelds rely on __MODUS_TARGET_DESKTOP_DISPLAY__ to be set
-OPTION(TARGET_HANDHELDS "Target hand-held devices" OFF)
-OPTION(TARGET_GAMESHELL "Target GameShell" OFF)
-OPTION(DEBUG_MODE "Enable Debug Mode" OFF)
-
-IF(TARGET_HANDHELD)
-    ADD_COMPILE_DEFINITIONS(__MODUS_TARGET_HANDHELDS__=true)
-
-    IF(TARGET_GAMESHELL)
-        ADD_COMPILE_DEFINITIONS(__MODUS_TARGET_GAMESHELL__=true)
-        REMOVE_DEFINITIONS(-D__MODUS_TARGET_DESKTOP_CONTROLS__)
-    ENDIF(TARGET_GAMESHELL)
-ENDIF(TARGET_HANDHELD)
-
-IF(DEBUG_MODE)
-    ADD_COMPILE_DEFINITIONS(DEBUG_MODE=true)
-ENDIF(DEBUG_MODE)
+set(MODITE_INCLUDE_DIRS
+    ${PROJECT_SOURCE_DIR}/src
+    ${PROJECT_SOURCE_DIR}/src/resources
+    ${PROJECT_SOURCE_DIR}/src/LoadGameState
+    ${PROJECT_SOURCE_DIR}/src/GameState
+    ${PROJECT_SOURCE_DIR}/src/GameState/environment
+    ${PROJECT_SOURCE_DIR}/src/GameState/player
+    ${PROJECT_SOURCE_DIR}/src/GameState/inventory
+    ${PROJECT_SOURCE_DIR}/src/GameState/enemies
+    ${PROJECT_SOURCE_DIR}/src/GameState/enemies/final-boss
+    ${PROJECT_SOURCE_DIR}/src/GameState/enemies/grunts
+    ${PROJECT_SOURCE_DIR}/src/GameState/enemies/mid-bosses
+    ${PROJECT_SOURCE_DIR}/src/GameState/enemies/wizard
+    ${PROJECT_SOURCE_DIR}/src/GameState/status
+    ${PROJECT_SOURCE_DIR}/src/GameMenuState
+    ${PROJECT_SOURCE_DIR}/src/DebugMenuState
+    ${PROJECT_SOURCE_DIR}/src/GameOverState
+    ${PROJECT_SOURCE_DIR}/src/VictoryState
+    ${PROJECT_SOURCE_DIR}/src/MainMenuState
+    ${PROJECT_SOURCE_DIR}/src/MainOptionsState
+    ${PROJECT_SOURCE_DIR}/src/SplashState
+    ${PROJECT_SOURCE_DIR}/src/CreditsState
+    ${PROJECT_SOURCE_DIR}/src/ResetState
+    ${PROJECT_BINARY_DIR}/usr/local/include
+)
 
 
-# Include Creative Engine
-# Exports:
-# ${CREATIVE_ENGINE_INCLUDE_DIRS} - used in INCLUDE_DIRECTORIES(...)
-# ${CREATIVE_ENGINE_SOURCE_FILES} - used in ADD_EXECUTABLE(...)
-# ${CREATIVE_ENGINE_LINK_LIBRARIES} - used in TARGET_LINK_LIBRARIES(...)
+file(GLOB_RECURSE MODITE_SRC CONFIGURE_DEPENDS
+    "${PROJECT_SOURCE_DIR}/src/*.cpp" "${PROJECT_SOURCE_DIR}/src/*.h"
+)
+add_executable(Modite ${MODITE_SRC})
+set_target_properties(Modite PROPERTIES CXX_STANDARD 14 CXX_STANDARD_REQUIRED YES)
+target_include_directories(Modite PRIVATE ${MODITE_INCLUDE_DIRS})
+target_compile_definitions(Modite PRIVATE
+    CE_SDL2_WINDOW_TITLE="Modite Adventure :: by Modus Create"
+    __MODUS_TARGET_SDL2_AUDIO__=true
+    __MODUS_TARGET_DESKTOP_DISPLAY__=true
+)
+if(DEBUG_MODE)
+    target_compile_definitions(Modite PRIVATE DEBUG_MODE=true)
+endif()
 
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/creative-engine/CreativeEngine.cmake)
-# Compiles RCOMP and resources, but only if ${RESOURCES_DIR} exists
-IF(EXISTS ${RESOURCES_DIR})
-  SET(RESOURCES_BIN_FILE "Resources.bin")
-compile_rcomp_and_resources()  # Only used when we are in development mode (AND you have access to licensed resource files)
+if(EMSCRIPTEN)
+    include(cmake/ModiteWeb.cmake)
 else()
-  SET(RESOURCES_BIN_FILE "${CMAKE_SOURCE_DIR}/src/Resources.bin")
-ENDIF()
-### LDK END   ####
+    option(TARGET_HANDHELDS "Target hand-held devices" OFF)
+    option(TARGET_GAMESHELL "Target GameShell" OFF)
 
-SET(MODITE_INCLUDE_DIRS
-    ${CMAKE_SOURCE_DIR}/src
-    ${CMAKE_SOURCE_DIR}/src/resources
-    ${CMAKE_SOURCE_DIR}/src/LoadGameState
-    ${CMAKE_SOURCE_DIR}/src/GameState
-    ${CMAKE_SOURCE_DIR}/src/GameState/environment
-    ${CMAKE_SOURCE_DIR}/src/GameState/player
-    ${CMAKE_SOURCE_DIR}/src/GameState/inventory
-    ${CMAKE_SOURCE_DIR}/src/GameState/enemies
-    ${CMAKE_SOURCE_DIR}/src/GameState/enemies/final-boss
-    ${CMAKE_SOURCE_DIR}/src/GameState/enemies/grunts
-    ${CMAKE_SOURCE_DIR}/src/GameState/enemies/mid-bosses
-    ${CMAKE_SOURCE_DIR}/src/GameState/enemies/wizard
-    ${CMAKE_SOURCE_DIR}/src/GameState/status
-    ${CMAKE_SOURCE_DIR}/src/GameMenuState
-    ${CMAKE_SOURCE_DIR}/src/DebugMenuState
-    ${CMAKE_SOURCE_DIR}/src/GameOverState
-    ${CMAKE_SOURCE_DIR}/src/VictoryState
-    ${CMAKE_SOURCE_DIR}/src/MainMenuState
-    ${CMAKE_SOURCE_DIR}/src/MainOptionsState
-    ${CMAKE_SOURCE_DIR}/src/SplashState
-    ${CMAKE_SOURCE_DIR}/src/CreditsState
-    ${CMAKE_SOURCE_DIR}/src/ResetState
-    ${CMAKE_BINARY_DIR}/usr/local/include
-)
+    # The singular spelling was accepted by the original GameShell configuration.
+    if(TARGET_HANDHELDS OR TARGET_HANDHELD)
+        target_compile_definitions(Modite PRIVATE __MODUS_TARGET_HANDHELDS__=true)
+        if(TARGET_GAMESHELL)
+            target_compile_definitions(Modite PRIVATE __MODUS_TARGET_GAMESHELL__=true)
+        endif()
+    endif()
 
-INCLUDE_DIRECTORIES(
-    ${MODITE_INCLUDE_DIRS}
-    ${CREATIVE_ENGINE_INCLUDE_DIRS}
-)
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wno-implicit-exception-spec-mismatch")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-implicit-exception-spec-mismatch")
+    include(ProcessorCount)
+    include("${PROJECT_SOURCE_DIR}/creative-engine/CreativeEngine.cmake")
 
-# gather Modite sources
-FILE(GLOB_RECURSE MODITE_SRC RELATIVE ${CMAKE_SOURCE_DIR} "src/*.cpp")
+    if((TARGET_HANDHELDS OR TARGET_HANDHELD) AND TARGET_GAMESHELL)
+        # Creative Engine enables desktop controls in its directory definitions.
+        get_property(engine_definitions DIRECTORY PROPERTY COMPILE_DEFINITIONS)
+        list(FILTER engine_definitions EXCLUDE REGEX "^__MODUS_TARGET_DESKTOP_CONTROLS__(=|$)")
+        set_property(DIRECTORY PROPERTY COMPILE_DEFINITIONS "${engine_definitions}")
+    else()
+        target_compile_definitions(Modite PRIVATE __MODUS_TARGET_DESKTOP_CONTROLS__=true)
+    endif()
 
-ADD_EXECUTABLE(
-    ${PROJECT_NAME}
-    ${RESOURCES_BIN_FILE}
-    ${CREATIVE_ENGINE_SOURCE_FILES}
-    ${MODITE_SRC}
-)
+    if(EXISTS "${PROJECT_SOURCE_DIR}/src/resources")
+        set(RESOURCES_BIN_FILE "Resources.bin")
+        compile_rcomp_and_resources()
+    else()
+        set(RESOURCES_BIN_FILE "${PROJECT_SOURCE_DIR}/src/Resources.bin")
+    endif()
 
-ProcessorCount(N)
-if (NOT N EQUAL 0)
-  set(${PROJECT_NAME}_FLAGS -j${N})
-  set(${PROJECT_NAME}_BUILD_FLAGS -j${N})
-  set(${PROJECT_NAME}_args ${${PROJECT_NAME}_args} PARALLEL_LEVEL ${N})
-endif ()
+    target_sources(Modite PRIVATE "${RESOURCES_BIN_FILE}" ${CREATIVE_ENGINE_SOURCE_FILES})
+    target_include_directories(Modite PRIVATE ${CREATIVE_ENGINE_INCLUDE_DIRS})
+    target_link_libraries(Modite PRIVATE ${CREATIVE_ENGINE_LINK_LIBRARIES})
 
-BUILD_COMMAND(
-    $(MAKE) --silent
-)
+    ProcessorCount(N)
+    if(NOT N EQUAL 0)
+        set(${PROJECT_NAME}_FLAGS -j${N})
+        set(${PROJECT_NAME}_BUILD_FLAGS -j${N})
+        set(${PROJECT_NAME}_args ${${PROJECT_NAME}_args} PARALLEL_LEVEL ${N})
+    endif()
+    build_command($(MAKE) --silent)
 
-# make Modite.app
-if (APPLE)
-  SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE
-  MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME}
-  XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES
-  CODE_SIGN_INJECT_BASE_ENTITLEMENTS NO)
-  INSTALL(TARGETS ${PROJECT_NAME} DESTINATION ".")
-endif (APPLE)
-
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CREATIVE_ENGINE_LINK_LIBRARIES})
-
-#INCLUDE( ${CMAKE_CURRENT_SOURCE_DIR}/test/test.cmake )
+    if(APPLE)
+        set_target_properties(Modite PROPERTIES
+            MACOSX_BUNDLE TRUE
+            MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME}
+            XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES
+            CODE_SIGN_INJECT_BASE_ENTITLEMENTS NO
+        )
+        install(TARGETS Modite DESTINATION ".")
+    endif()
+endif()

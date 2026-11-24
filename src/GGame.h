@@ -31,6 +31,7 @@ public:
 
 public:
   void Run();
+  static void RumbleImpact();
 
 public:
   void SetState(TInt aNewState, TAny *aLocalData = ENull, TUint32 aSize = 0);
@@ -48,7 +49,10 @@ public:
   BGameEngine *CurrentState();
 
   static TBool mDebug;
-protected:
+
+private:
+  TBool RunFrame();
+
 protected:
   TInt mState;
   TInt mNextState;

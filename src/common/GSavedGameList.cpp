@@ -1,9 +1,9 @@
 #include "GSavedGameList.h"
 #include <BStore.h>
 #include <Panic.h>
+#include <cctype>
 #include <dirent.h>
 #include <sys/stat.h>
-#include <ctype.h>
 
 GSavedGameList gSavedGameList;
 
@@ -52,7 +52,7 @@ void GSavedGameList::LoadSavedGameList() {
       if (!ptr) {
         continue;
       }
-      while (isdigit(*ptr)) {
+      while (std::isdigit(static_cast<unsigned char>(*ptr))) {
         game_number *= 10;
         game_number += *ptr++ - '0';
       }

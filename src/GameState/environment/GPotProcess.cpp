@@ -1,4 +1,5 @@
 #include "GPotProcess.h"
+#include "GGame.h"
 
 static const TInt BREAK_SPEED = 5;
 
@@ -78,6 +79,7 @@ TBool GPotProcess::RunAfter() {
   }
   else if (mSprite->cType & STYPE_PBULLET) {
     mAnimating = ETrue;
+    GGame::RumbleImpact();
     if (--mHitPoints > 0) {
       mSprite->StartAnimation(hitAnimation);
       gSoundPlayer.TriggerSfx(SFX_POT_TAKE_DAMAGE_WAV);

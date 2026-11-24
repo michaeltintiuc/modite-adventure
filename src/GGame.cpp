@@ -3,6 +3,11 @@
 #include "GPlayer.h"
 #include "inventory/GInventory.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include "WebGamepad.h"
+#endif
+
 static TUint32 start;
 
 BFont *gFont8x8, *gFont16x16;
@@ -192,118 +197,138 @@ TBool GGame::IsGameState() {
  *******************************************************************************
  *******************************************************************************/
 
-void GGame::Run() {
-#ifdef ENABLE_OPTIONS
-  TBool muted = gOptions->muted;
+void GGame::RumbleImpact() {
+#ifdef __EMSCRIPTEN__
+  if (gOptions && gOptions->rumble > 0) {
+    RumbleWebGamepad(0.85f * gOptions->rumble / TOptions::RUMBLE_MAX, 150);
+  }
 #endif
+}
 
-  TBool done = EFalse;
-  while (!done) {
-    Random(); // randomize
-    mShmoo.Set(TUint8(mShmoo.r + 16), TUint8(mShmoo.g + 16), TUint8(mShmoo.b + 16));
-    gDisplay.displayBitmap->SetColor(COLOR_SHMOO, mShmoo);
-    gDisplay.displayBitmap->SetColor(COLOR_SHMOO_RED, mShmoo.r, 20, 20);
-    gDisplay.displayBitmap->SetColor(COLOR_SHMOO_GREEN, 20, mShmoo.g, 20);
+void GGame::Run() {
+#ifdef __EMSCRIPTEN__
+  emscripten_set_main_loop_arg([](void *context) {
+    auto *game = static_cast<GGame *>(context);
+    if (!game->RunFrame()) {
+      // Update presents the render bitmap after swapping the buffers.
+      gDisplay.SetColor(0, 0, 0, 0);
+      gDisplay.renderBitmap->Clear();
+      gDisplay.Update();
+      soundEngine.Reset();
+      emscripten_cancel_main_loop();
+      delete game;
+      gGame = nullptr;
+    }
+  }, this, FRAMES_PER_SECOND, true);
+#else
+  while (RunFrame()) {
+  }
+#endif
+}
 
-    if (mNextState != mState) {
-      switch (mNextState) {
-        case GAME_STATE_SPLASH:
-          delete gGameEngine;
-          gGameEngine = new GSplashState();
-          break;
-        case GAME_STATE_MAIN_MENU:
-          delete gGameEngine;
-          gGameEngine = new GMainMenuState((GGameState *)gGameEngine);
-          break;
-        case GAME_STATE_LOAD_GAME:
-          delete gGameEngine;
-          gGameEngine = new GLoadGameState();
-          break;
-        case GAME_STATE_MAIN_OPTIONS:
-          delete gGameEngine;
-          gGameEngine = new GMainOptionsState();
-          break;
-        case GAME_STATE_RESET_OPTIONS:
-          delete gGameEngine;
-          gGameEngine = new GResetOptionsState();
-          break;
-        case GAME_STATE_RESET_GAME:
-        case GAME_STATE_GAME:
-          delete gGameEngine;
-          gGameEngine = new GGameState();
-          break;
-        case GAME_STATE_LOAD_SAVEGAME:
-        case GAME_STATE_RESUME_GAME:
-          delete gGameEngine;
-          gGameEngine = new GGameState((char *)mLocalData);
-          break;
-        case GAME_STATE_VICTORY:
-          delete gGameEngine;
-          gGameEngine = new GVictoryState((GGameState *)gGameEngine);
-          break;
-        case GAME_STATE_QUIT:
-          done = ETrue;
-        default:
-          continue;
-      }
-      // reset dKeys so next state doesn't react to any keys already pressed
-      gControls.dKeys = 0;
-      mState = mNextState;
-    }
+TBool GGame::RunFrame() {
+  Random(); // randomize
+  mShmoo.Set(TUint8(mShmoo.r + 16), TUint8(mShmoo.g + 16), TUint8(mShmoo.b + 16));
+  gDisplay.displayBitmap->SetColor(COLOR_SHMOO, mShmoo);
+  gDisplay.displayBitmap->SetColor(COLOR_SHMOO_RED, mShmoo.r, 20, 20);
+  gDisplay.displayBitmap->SetColor(COLOR_SHMOO_GREEN, 20, mShmoo.g, 20);
 
-    if (mInventory) {
-      mInventory->GameLoop();
+  if (mNextState != mState) {
+    switch (mNextState) {
+      case GAME_STATE_SPLASH:
+        delete gGameEngine;
+        gGameEngine = new GSplashState();
+        break;
+      case GAME_STATE_MAIN_MENU:
+        delete gGameEngine;
+        gGameEngine = new GMainMenuState((GGameState *)gGameEngine);
+        break;
+      case GAME_STATE_LOAD_GAME:
+        delete gGameEngine;
+        gGameEngine = new GLoadGameState();
+        break;
+      case GAME_STATE_MAIN_OPTIONS:
+        delete gGameEngine;
+        gGameEngine = new GMainOptionsState();
+        break;
+      case GAME_STATE_RESET_OPTIONS:
+        delete gGameEngine;
+        gGameEngine = new GResetOptionsState();
+        break;
+      case GAME_STATE_RESET_GAME:
+      case GAME_STATE_GAME:
+        delete gGameEngine;
+        gGameEngine = new GGameState();
+        break;
+      case GAME_STATE_LOAD_SAVEGAME:
+      case GAME_STATE_RESUME_GAME:
+        delete gGameEngine;
+        gGameEngine = new GGameState((char *)mLocalData);
+        break;
+      case GAME_STATE_VICTORY:
+        delete gGameEngine;
+        gGameEngine = new GVictoryState((GGameState *)gGameEngine);
+        break;
+      case GAME_STATE_QUIT:
+        return EFalse;
+      default:
+        return ETrue;
     }
-    else if (mGameMenu) {
-      gGameEngine->GameLoop();
-      mGameMenu->GameLoop();
-    }
-    else if (mDebugMenu) {
-      gGameEngine->GameLoop();
-      mDebugMenu->GameLoop();
-    }
-    else {
-      gGameEngine->GameLoop();
-    }
+    // reset dKeys so next state doesn't react to any keys already pressed
+    gControls.dKeys = 0;
+    mState = mNextState;
+  }
 
-    gDisplay.Update();
-    TUint32 now = Milliseconds();
-    start = now;
+  if (mInventory) {
+    mInventory->GameLoop();
+  }
+  else if (mGameMenu) {
+    gGameEngine->GameLoop();
+    mGameMenu->GameLoop();
+  }
+  else if (mDebugMenu) {
+    gGameEngine->GameLoop();
+    mDebugMenu->GameLoop();
+  }
+  else {
+    gGameEngine->GameLoop();
+  }
+
+  gDisplay.Update();
+  TUint32 now = Milliseconds();
+  start = now;
 
 #ifdef FRAME_RATE_INFO
-    TUint32 elapsed = now - start;
-    printf("elapsed %4d\r", elapsed);
+  TUint32 elapsed = now - start;
+  printf("elapsed %4d\r", elapsed);
 #endif
 
 #ifdef DEBUG_MODE
-    if (gControls.WasPressed(CONTROL_DEBUG)) {
-      if (IsGameState()) {
-        ToggleDebugMenu();
-      }
+  if (gControls.WasPressed(CONTROL_DEBUG)) {
+    if (IsGameState()) {
+      ToggleDebugMenu();
     }
+  }
 #endif
 
-    if (IsGameState() && gControls.WasPressed(BUTTON_START)) {
-      ToggleInGameMenu();
-    }
+  if (IsGameState() && gControls.WasPressed(BUTTON_START)) {
+    ToggleInGameMenu();
+  }
 
-    // right shoulder button brings up inventory
-    if (IsGameState() && gControls.WasPressed(CONTROL_INVENTORY)) {
-      ToggleInventory();
-    }
+  // right shoulder button brings up inventory
+  if (IsGameState() && gControls.WasPressed(CONTROL_INVENTORY)) {
+    ToggleInventory();
+  }
 
-    if (gControls.WasPressed(BUTTONQ)) {
-      done = ETrue;
-    }
+  const TBool done = gControls.WasPressed(BUTTONQ);
 #ifdef ENABLE_OPTIONS
-    if (gControls.WasPressed(BUTTON2)) {
-      muted = !muted;
-      gOptions->muted = muted;
-      gOptions->Save();
+  if (gControls.WasPressed(BUTTON2)) {
+    gOptions->muted = !gOptions->muted;
+    gOptions->Save();
 #ifdef ENABLE_AUDIO
-      //      gSoundPlayer.MuteMusic(muted);
-#endif
-    }
+    //      gSoundPlayer.MuteMusic(gOptions->muted);
 #endif
   }
+#endif
+  return !done;
 }

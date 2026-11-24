@@ -1,18 +1,30 @@
 #include "Game.h"
 #include "GMusicWidget.h"
 #include "GSfxWidget.h"
+#ifdef __EMSCRIPTEN__
+#include "GRumbleWidget.h"
+#else
 #include "GResetWidget.h"
+#endif
 #include "GSeeCreditsWidget.h"
 #include "GExitWidget.h"
 
- static const TUint16 WIDGET_CONTAINER_Y = 60;
+#ifdef __EMSCRIPTEN__
+static const TUint16 WIDGET_CONTAINER_Y = 50;
+#else
+static const TUint16 WIDGET_CONTAINER_Y = 60;
+#endif
 
 class OptionsContainer : public GDialogWidget {
 public:
     OptionsContainer(TInt aX, TInt aY) : GDialogWidget("SHIT", aX, aY) {
       AddWidget((BWidget &) *new GMusicWidget());
       AddWidget((BWidget &) *new GSfxWidget());
+#ifdef __EMSCRIPTEN__
+      AddWidget((BWidget &) *new GRumbleWidget());
+#else
       AddWidget((BWidget &) *new GResetWidget());
+#endif
       AddWidget((BWidget &) *new GSeeCreditsWidget());
       AddWidget((BWidget &) *new GExitWidget());
     }

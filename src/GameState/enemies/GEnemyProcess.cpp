@@ -1,5 +1,6 @@
 #include "GEnemyProcess.h"
 
+#include "GGame.h"
 const TUint8 BLINK_TIME = 4 * FACTOR;
 
 GEnemyProcess::GEnemyProcess(GGameState *aGameState, TFloat aX, TFloat aY, TUint16 aSlot, TUint16 aAttribute)
@@ -92,6 +93,7 @@ void GEnemyProcess::DoDamage(TInt aStrength, TBool aRandomize) {
     mHitPoints -= aStrength;
     mGameState->AddProcess(new GStatProcess(STAT_ENEMY_HIT, mSprite->Center(), "%d", aStrength));
     gSoundPlayer.TriggerSfx(SFX_ENEMY_TAKE_DAMAGE_WAV, 4);
+    GGame::RumbleImpact();
     mInvulnerable = ETrue;
   }
   else {

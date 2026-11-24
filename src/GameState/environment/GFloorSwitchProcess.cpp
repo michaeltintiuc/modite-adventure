@@ -1,4 +1,5 @@
 #include "GFloorSwitchProcess.h"
+#include "GGame.h"
 
 const TInt ANIM_SPEED = FRAMES_PER_SECOND;
 
@@ -53,6 +54,7 @@ TBool GFloorSwitchProcess::RunAfter() {
 
   if (mSprite->TestAndClearCType(STYPE_PBULLET)) {
     if (!mAnimating) {
+      GGame::RumbleImpact();
       mState = !mState;
       OBJECT_ATTRIBUTE *oa = (OBJECT_ATTRIBUTE *)&mParam;
       mAnimating = ETrue;
