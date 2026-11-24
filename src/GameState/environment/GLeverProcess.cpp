@@ -1,4 +1,5 @@
 #include "GLeverProcess.h"
+#include "GGame.h"
 
 const TInt ANIM_SPEED = FRAMES_PER_SECOND;
 
@@ -80,6 +81,7 @@ TBool GLeverProcess::RunAfter() {
           mDirection = ETrue;
         }
       }
+      GGame::RumbleImpact();
       mAnimating = ETrue;
       switch (mState) {
         case 0:

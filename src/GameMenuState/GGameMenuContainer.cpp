@@ -1,6 +1,7 @@
 #include "GGameMenuContainer.h"
 #include "GMusicWidget.h"
 #include "GSfxWidget.h"
+#include "GRumbleWidget.h"
 #include "GSaveWidget.h"
 #include "GResumeWidget.h"
 #include "GQuitWidget.h"
@@ -53,6 +54,9 @@ void GGameMenuContainer::OptionsState() {
 
   AddWidget((BWidget &) *new GMusicWidget());
   AddWidget((BWidget &) *new GSfxWidget());
+#ifdef __EMSCRIPTEN__
+  AddWidget((BWidget &) *new GRumbleWidget());
+#endif
   AddWidget((BWidget &) *new GOptionsWidget(this, ETrue));
 
   mCurrentWidget = mList.First();

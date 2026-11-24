@@ -5,6 +5,7 @@
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
+#include "WebGamepad.h"
 #endif
 
 static TUint32 start;
@@ -195,6 +196,14 @@ TBool GGame::IsGameState() {
 /*******************************************************************************
  *******************************************************************************
  *******************************************************************************/
+
+void GGame::RumbleImpact() {
+#ifdef __EMSCRIPTEN__
+  if (gOptions && gOptions->rumble > 0) {
+    RumbleWebGamepad(0.85f * gOptions->rumble / TOptions::RUMBLE_MAX, 150);
+  }
+#endif
+}
 
 void GGame::Run() {
 #ifdef __EMSCRIPTEN__

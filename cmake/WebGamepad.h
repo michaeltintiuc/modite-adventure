@@ -5,6 +5,8 @@
 #include <cstring>
 #include <emscripten/html5.h>
 
+extern "C" void RumbleWebGamepad(float strength, int duration);
+
 inline TUint16 ReadWebGamepad() {
   if (emscripten_sample_gamepad_data() != EMSCRIPTEN_RESULT_SUCCESS) {
     return 0;

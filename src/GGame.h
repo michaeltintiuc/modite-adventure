@@ -31,6 +31,7 @@ public:
 
 public:
   void Run();
+  static void RumbleImpact();
 
 public:
   void SetState(TInt aNewState, TAny *aLocalData = ENull, TUint32 aSize = 0);

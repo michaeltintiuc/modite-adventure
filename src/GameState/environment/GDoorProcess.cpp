@@ -1,4 +1,5 @@
 #include "GDoorProcess.h"
+#include "GGame.h"
 #include "GGamePlayfield.h"
 #include "GPlayer.h"
 #include "BSpriteSheet.h"
@@ -126,6 +127,7 @@ TBool GDoorProcess::RunAfter() {
         printf("door open player used item %d\n", item);
         ClearWall();
         mGameState->EndProgram(mIp);
+        GGame::RumbleImpact();
         gSoundPlayer.TriggerSfx(SFX_DOOR_OPEN_WAV);
         return EFalse;
       }
@@ -134,6 +136,7 @@ TBool GDoorProcess::RunAfter() {
     printf("player opens door\n");
     ClearWall();
     mGameState->EndProgram(mIp);
+    GGame::RumbleImpact();
     gSoundPlayer.TriggerSfx(SFX_DOOR_OPEN_WAV);
 
     return EFalse;

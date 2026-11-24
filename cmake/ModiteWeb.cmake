@@ -61,7 +61,7 @@ list(APPEND engine_sources "${web_controls}")
 # The engine calls time() without including its header.
 set_source_files_properties("${engine}/BApplication.cpp" PROPERTIES COMPILE_OPTIONS "-include;time.h")
 target_sources(Modite PRIVATE ${engine_sources} "${resource_manager}" "${resource_header}"
-        "${CMAKE_CURRENT_LIST_DIR}/WebGamepad.h")
+        "${CMAKE_CURRENT_LIST_DIR}/WebGamepad.cpp" "${CMAKE_CURRENT_LIST_DIR}/WebGamepad.h")
 set_target_properties(Modite PROPERTIES
         OUTPUT_NAME index
         SUFFIX ".html"
