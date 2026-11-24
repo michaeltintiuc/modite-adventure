@@ -4,6 +4,7 @@
 #include <cctype>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <ctype.h>
 
 GSavedGameList gSavedGameList;
 

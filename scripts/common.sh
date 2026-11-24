@@ -40,7 +40,7 @@ function ensure_cmake {
     local cmake
     version=3.12
     build=3
-    arch=$(arch)
+    arch=$(uname -m)
     uname=$(uname -s)
     tmpdir=$(mktemp -d)
     cmake="cmake-$version.$build-$uname-$arch"
