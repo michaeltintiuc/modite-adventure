@@ -17,7 +17,7 @@ def main():
         (output_dir / "Resources.h").write_bytes(archive.read("Resources.h"))
         resources = archive.read("Resources.bin")
 
-    # WebAssembly cannot assemble the native .incbin block.
+    # Use a C++ array on platforms without the engine's native assembly.
     with (output_dir / engine_source.name).open("w", encoding="utf-8") as output:
         output.write(source[:start])
         output.write("alignas(16) static TUint8 resources[] = {\n")

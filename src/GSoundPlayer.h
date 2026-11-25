@@ -3,7 +3,7 @@
 
 #include "BSoundEngine.h"
 
-#include "Resources.h"
+#include <Resources.h>
 
 
 class GSoundPlayer : public BBase {

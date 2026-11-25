@@ -1,9 +1,8 @@
 #include "Game.h"
 #include "GMusicWidget.h"
 #include "GSfxWidget.h"
-#ifdef __EMSCRIPTEN__
 #include "GRumbleWidget.h"
-#else
+#ifndef __EMSCRIPTEN__
 #include "GResetWidget.h"
 #endif
 #include "GSeeCreditsWidget.h"
@@ -11,6 +10,8 @@
 
 #ifdef __EMSCRIPTEN__
 static const TUint16 WIDGET_CONTAINER_Y = 50;
+#elif defined(MODITE_GAMEPAD_RUMBLE)
+static const TUint16 WIDGET_CONTAINER_Y = 44;
 #else
 static const TUint16 WIDGET_CONTAINER_Y = 60;
 #endif
@@ -20,9 +21,10 @@ public:
     OptionsContainer(TInt aX, TInt aY) : GDialogWidget("SHIT", aX, aY) {
       AddWidget((BWidget &) *new GMusicWidget());
       AddWidget((BWidget &) *new GSfxWidget());
-#ifdef __EMSCRIPTEN__
+#ifdef MODITE_GAMEPAD_RUMBLE
       AddWidget((BWidget &) *new GRumbleWidget());
-#else
+#endif
+#ifndef __EMSCRIPTEN__
       AddWidget((BWidget &) *new GResetWidget());
 #endif
       AddWidget((BWidget &) *new GSeeCreditsWidget());

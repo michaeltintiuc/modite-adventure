@@ -6,6 +6,8 @@
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include "WebGamepad.h"
+#elif defined(_WIN32)
+#include "WindowsGamepad.h"
 #endif
 
 static TUint32 start;
@@ -198,9 +200,14 @@ TBool GGame::IsGameState() {
  *******************************************************************************/
 
 void GGame::RumbleImpact() {
-#ifdef __EMSCRIPTEN__
+#ifdef MODITE_GAMEPAD_RUMBLE
   if (gOptions && gOptions->rumble > 0) {
-    RumbleWebGamepad(0.85f * gOptions->rumble / TOptions::RUMBLE_MAX, 150);
+    const float strength = 0.85f * gOptions->rumble / TOptions::RUMBLE_MAX;
+#ifdef __EMSCRIPTEN__
+    RumbleWebGamepad(strength, 150);
+#else
+    RumbleWindowsGamepad(strength, 150);
+#endif
   }
 #endif
 }
