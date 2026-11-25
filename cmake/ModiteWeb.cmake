@@ -1,62 +1,19 @@
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
-
 set(engine "${PROJECT_SOURCE_DIR}/creative-engine/src")
 if (NOT EXISTS "${engine}/BResourceManager.cpp")
     message(FATAL_ERROR "Creative Engine is missing. Clone its develop branch into creative-engine.")
 endif ()
 
 set(generated "${PROJECT_BINARY_DIR}/web-generated")
-file(MAKE_DIRECTORY "${generated}")
-set(resource_manager "${generated}/BResourceManager.cpp")
-set(resource_header "${generated}/Resources.h")
-add_custom_command(
-        OUTPUT "${resource_manager}" "${resource_header}"
-        COMMAND Python3::Interpreter "${PROJECT_SOURCE_DIR}/scripts/embed-web-resources.py"
-        "${PROJECT_SOURCE_DIR}/src/Resources.zip" "${engine}/BResourceManager.cpp" "${generated}"
-        DEPENDS src/Resources.zip scripts/embed-web-resources.py "${engine}/BResourceManager.cpp"
-        VERBATIM
-)
+include("${CMAKE_CURRENT_LIST_DIR}/ModiteEmbeddedResources.cmake")
 
 file(GLOB_RECURSE engine_sources CONFIGURE_DEPENDS
         "${engine}/*.cpp" "${engine}/*.c" "${engine}/*.h")
 set(desktop_controls "${engine}/Controls/DesktopControls/DesktopControls.cpp")
 list(REMOVE_ITEM engine_sources "${engine}/BResourceManager.cpp" "${desktop_controls}")
 
-# Keep SDL keyboard events and sample the browser's standard gamepad every poll.
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${desktop_controls}")
-file(READ "${desktop_controls}" controls_source)
-set(include_marker [=[#include "DesktopControls.h"]=])
-set(update_marker [=[    // cKeys are journaled if journaling is on!
-    dKeys |= TUint16(TUint16(keys) ^ TUint16(TUint16(cKeys) & TUint16(keys)));
-    cKeys = keys;
-    bKeys = keys;
-  }]=])
-foreach(marker IN ITEMS include_marker update_marker)
-    string(FIND "${controls_source}" "${${marker}}" marker_offset)
-    if(marker_offset EQUAL -1)
-        message(FATAL_ERROR "Unsupported Creative Engine desktop controls source")
-    endif()
-endforeach()
-string(REPLACE "${include_marker}" [=[#include "DesktopControls.h"
-#undef CONTROLLER_SUPPORT
-#include "WebGamepad.h"]=] controls_source "${controls_source}")
-string(REPLACE "  SDL_Event e;" "  const TUint16 gamepadKeys = ReadWebGamepad();
-  SDL_Event e;" controls_source "${controls_source}")
-string(REPLACE "  while (SDL_PollEvent(&e)) {" [=[  while (SDL_PollEvent(&e)) {
-    if ((e.type == SDL_KEYDOWN || e.type == SDL_KEYUP) && e.key.keysym.scancode == SDL_SCANCODE_Q) {
-      continue;
-    }]=] controls_source "${controls_source}")
-string(REPLACE "${update_marker}" [=[    bKeys = keys;
-    const TUint16 combined = keys | gamepadKeys;
-    dKeys |= combined & ~cKeys;
-    cKeys = combined;
-  }
-
-  const TUint16 combined = bKeys | gamepadKeys;
-  dKeys |= combined & ~cKeys;
-  cKeys = combined;]=] controls_source "${controls_source}")
+include("${CMAKE_CURRENT_LIST_DIR}/ModiteGamepadControls.cmake")
 set(web_controls "${generated}/DesktopControls.cpp")
-file(GENERATE OUTPUT "${web_controls}" CONTENT "${controls_source}")
+configure_gamepad_controls("${desktop_controls}" "${web_controls}" WebGamepad.h ReadWebGamepad)
 list(APPEND engine_sources "${web_controls}")
 # The engine calls time() without including its header.
 set_source_files_properties("${engine}/BApplication.cpp" PROPERTIES COMPILE_OPTIONS "-include;time.h")
@@ -71,6 +28,7 @@ set_target_properties(Modite PROPERTIES
 target_compile_definitions(Modite PRIVATE
         __MODUS_TARGET_DESKTOP_CONTROLS__=true
         LIBXMP_CORE_PLAYER
+        MODITE_GAMEPAD_RUMBLE
 )
 target_compile_options(Modite PRIVATE --use-port=sdl2)
 set(web_shell "${CMAKE_CURRENT_LIST_DIR}/web-shell.html")

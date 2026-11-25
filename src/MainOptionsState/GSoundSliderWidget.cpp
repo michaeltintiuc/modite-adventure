@@ -41,7 +41,7 @@ TInt GSoundSliderWidget::RenderTitle(TInt aX, TInt aY, TBool aActive) {
 }
 
 TInt GSoundSliderWidget::Render(TInt aX, TInt aY) {
-#ifdef __EMSCRIPTEN__
+#ifdef MODITE_GAMEPAD_RUMBLE
   aX += 66;
 #else
   aX += 60;

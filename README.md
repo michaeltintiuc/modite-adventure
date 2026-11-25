@@ -7,6 +7,34 @@ Modite Adventure is a cross-platform a action/adventure created by [Modus Create
 
 For build instructions, take a look at our [development documentation](https://github.com/ModusCreateOrg/modite-adventure/wiki).
 
+## Windows desktop build
+
+Use CMake 3.15 or later, Ninja, Python 3, and [LLVM-MinGW](https://github.com/mstorsjo/llvm-mingw/releases). Extract the MinGW development packages for [SDL2](https://github.com/libsdl-org/SDL/releases/tag/release-2.32.10) and [SDL2_image](https://github.com/libsdl-org/SDL_image/releases/tag/release-2.8.8). Use the x86-64 directories from both packages. If `creative-engine` is missing, clone its `develop` branch into the repository root as shown below.
+
+In PowerShell, set these three paths to your extracted directories and run the commands from the project root.
+
+```powershell
+$llvmMingw = 'path/to/llvm-mingw'
+$sdl = 'path/to/SDL2/x86_64-w64-mingw32'
+$sdlImage = 'path/to/SDL2_image/x86_64-w64-mingw32'
+$configure = @(
+  '-S', '.', '-B', 'build/windows', '-G', 'Ninja',
+  '-DCMAKE_BUILD_TYPE=Release',
+  "-DCMAKE_C_COMPILER=$llvmMingw/bin/x86_64-w64-mingw32-clang.exe",
+  "-DCMAKE_CXX_COMPILER=$llvmMingw/bin/x86_64-w64-mingw32-clang++.exe",
+  "-DCMAKE_PREFIX_PATH=$sdl;$sdlImage"
+)
+cmake @configure
+cmake --build build/windows
+.\build\windows\Modite.exe
+```
+
+The build copies `SDL2.dll` alongside `Modite.exe` and embeds the assets from `src/Resources.zip`. To stage the executable and DLL for distribution, run `cmake --install build/windows --prefix build/windows-package`. The game stores saves and options in `%USERPROFILE%\.modus`.
+
+Once `build/windows` has been configured, select **Build and Run (Windows x64)** in Rider to build and launch the desktop game.
+
+SDL2-compatible gamepads can connect before or during play. On an Xbox controller, use the left stick or D-pad to move, **B** to attack or confirm, **A** to run, and **Menu** to pause. Adjust controller vibration with **Rumble** in Options.
+
 ## Browser build for itch.io
 
 Install [Emscripten](https://emscripten.org/docs/getting_started/downloads.html), CMake, Ninja, and Python 3. This build was tested with Emscripten 7.0.1. If the `creative-engine` directory is missing,
