@@ -9,7 +9,7 @@ For build instructions, take a look at our [development documentation](https://g
 
 ## Windows desktop build
 
-Use CMake 3.15 or later, Ninja, Python 3, and [LLVM-MinGW](https://github.com/mstorsjo/llvm-mingw/releases). Extract the MinGW development packages for [SDL2](https://github.com/libsdl-org/SDL/releases/tag/release-2.32.10) and [SDL2_image](https://github.com/libsdl-org/SDL_image/releases/tag/release-2.8.8). Use the x86-64 directories from both packages. If `creative-engine` is missing, clone its `develop` branch into the repository root as shown below.
+Use CMake 3.15 or later, Ninja, Python 3, and [LLVM-MinGW](https://github.com/mstorsjo/llvm-mingw/releases). Extract the MinGW development packages for [SDL2](https://github.com/libsdl-org/SDL/releases/tag/release-2.32.10) and [SDL2_image](https://github.com/libsdl-org/SDL_image/releases/tag/release-2.8.8). Use the x86-64 directories from both packages. If `creative-engine` is missing, clone its `platform-support` branch into the repository root as shown below.
 
 In PowerShell, set these three paths to your extracted directories and run the commands from the project root.
 
@@ -41,7 +41,7 @@ Install [Emscripten](https://emscripten.org/docs/getting_started/downloads.html)
 clone Creative Engine from the repository root.
 
 ```powershell
-git clone --branch develop https://github.com/ModusCreateOrg/creative-engine.git creative-engine
+git clone --branch platform-support https://github.com/michaeltintiuc/creative-engine.git creative-engine
 ```
 
 In a shell with the Emscripten SDK environment active, run these commands from the repository root. Emscripten fetches and builds its SDL2 port on the first
