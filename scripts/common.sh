@@ -84,7 +84,7 @@ function ensure_arch_devtools_installed {
 
 function ensure_creative_engine {
     if [[ ! -d "$CREATIVE_ENGINE_DIR" ]]; then
-        git clone https://github.com/ModusCreateOrg/creative-engine.git -b develop "$CREATIVE_ENGINE_DIR"
+        git clone --branch "${CREATIVE_ENGINE_BRANCH:-platform-support}" https://github.com/michaeltintiuc/creative-engine.git "$CREATIVE_ENGINE_DIR"
     fi
 }
 
@@ -253,19 +253,14 @@ function patch_linux_build {
 }
 
 function checkout_creative_engine_branch {
-    DEFAULT_BRANCH="develop"
-    MODITE_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-    cd "$BASE_DIR" || exit 1
-    echo "The current modite branch is: $MODITE_BRANCH"
-    if ($MODITE_BRANCH != "master" && cd "$CREATIVE_ENGINE_DIR" && git checkout "$MODITE_BRANCH"); then
-        echo "Checked out creatine-engine branch: $MODITE_BRANCH"
-    elif (cd "$CREATIVE_ENGINE_DIR" && git checkout "$DEFAULT_BRANCH"); then
-        echo "Checked out creatine-engine branch: $DEFAULT_BRANCH"
-    else
-        echo "Faied to checkout a branch for creatine-engine!"
-        exit 1
+    local default_branch="${CREATIVE_ENGINE_BRANCH:-platform-support}"
+    local modite_branch
+    modite_branch=$(git -C "$BASE_DIR" rev-parse --abbrev-ref HEAD)
+
+    if [[ "$modite_branch" != "master" ]] && git -C "$CREATIVE_ENGINE_DIR" checkout "$modite_branch"; then
+        return
     fi
-    cd - || exit 1
+    git -C "$CREATIVE_ENGINE_DIR" checkout "$default_branch"
 }
 
 function checkout_resources_branch {

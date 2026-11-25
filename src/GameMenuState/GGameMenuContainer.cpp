@@ -54,7 +54,7 @@ void GGameMenuContainer::OptionsState() {
 
   AddWidget((BWidget &) *new GMusicWidget());
   AddWidget((BWidget &) *new GSfxWidget());
-#ifdef MODITE_GAMEPAD_RUMBLE
+#if CONTROLLER_SUPPORT
   AddWidget((BWidget &) *new GRumbleWidget());
 #endif
   AddWidget((BWidget &) *new GOptionsWidget(this, ETrue));
